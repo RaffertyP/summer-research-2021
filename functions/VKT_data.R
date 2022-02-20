@@ -34,6 +34,4 @@ times_tui_VKT$consumption = times_tui_VKT$power_usage/times_tui_VKT$Electricity
 
 save(vkt_quart, vkt_yearly, vkt_regions, vkt_pass,times_kea_VKT, times_tui_VKT, file = "processed_data/VKT_data.rda")
 
-rm(list=ls())
-
-
+rm(list = ls())
