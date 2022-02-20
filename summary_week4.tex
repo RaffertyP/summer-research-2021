@@ -4,10 +4,6 @@
 %
 \documentclass[
 ]{article}
-\title{Quick summary}
-\author{Pablo Paulsen}
-\date{06/12/2021}
-
 \usepackage{amsmath,amssymb}
 \usepackage{lmodern}
 \usepackage{iftex}
@@ -75,9 +71,14 @@
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
 \usepackage{float}
 \floatplacement{figure}{H}
+\usepackage{comment}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
+
+\title{Quick summary}
+\author{Pablo Paulsen}
+\date{06/12/2021}
 
 \begin{document}
 \maketitle
@@ -113,12 +114,13 @@ use in this project. Further data on yearly VKT for the ``other''
 regions, the vehicle fuel type and vehicle type was collected from the
 publicly available fleet statistics page on NZTA's website.
 
-Using the regional hourly temperatures, monthly heating degree days
-(HDD) and cooling degree days (CDD) were imputed using base temperatures
-of 16\(^\circ\)C and 22\(^\circ\)C respectively. The base temperatures
-were selected to represent the range of comfortable temperatures for
-most people, as research shows that a majority of the seasonal variation
-in EV efficiency is due to cabin temperature control\cite{ev_range}.
+The base temperatures were selected to represent the range of
+comfortable temperatures for most people, as research shows that a
+majority of the seasonal variation in EV efficiency is due to cabin
+temperature control\cite{ev_range}. Using the regional hourly
+temperatures, monthly heating degree days (HDD) and cooling degree days
+(CDD) were imputed using base temperatures of 16\(^\circ\)C and
+22\(^\circ\)C respectively.
 
 The HDD and CDD was then divided by the length of the month so that HDD
 and CDD corresponds to average heating degrees days per day for the
@@ -140,8 +142,8 @@ Power consumption (Wh/km) was calculated using the efficiency (km/kWh).
 This will be used instead of efficiency in the modeling for reasons that
 will become apparent later in the analysis.
 
-\hypertarget{results}{%
-\subsection{Results}\label{results}}
+\hypertarget{data-exploration}{%
+\subsection{Data Exploration}\label{data-exploration}}
 
 \begin{figure}
 \centering
@@ -149,52 +151,60 @@ will become apparent later in the analysis.
 \caption{Time Series of EV Consumption}
 \end{figure}
 
-Plotting monthly average consumption for all of NZ we can see that there
-is a very clear seasonal trend.
+Plotting monthly average consumption of Flip the Fleets vehicles in all
+of NZ we can see that there is a very clear seasonal trend.
 
-Used 2 different methods of decomposition of the seasonal trend of
-consumption.
+\begin{comment}
 
-\begin{itemize}
-  \item Linear model with each month as an independent factor
   \begin{itemize}
-    \item offers more control and flexibility (could add vehicle type etc in further analysis)
-    \item shows confidence interval
-    \item requires to define an arbitrary function that can fit to the overall trend to separate from seasonal trend
-    \item least squares is sensitive to single large deviation that could just be outlier (such as lockdown)
+    \item Linear model with each month as an independent factor
+    \begin{itemize}
+      \item offers more control and flexibility (could add vehicle type etc in further analysis)
+      \item shows confidence interval
+      \item requires to define an arbitrary function that can fit to the overall trend to separate from seasonal trend
+      \item least squares is sensitive to single large deviation that could just be outlier (such as lockdown)
+    \end{itemize}
+    \item Time series Decomposition
+    \begin{itemize}
+      \item designed for time series
+      \item automatically finds an overall trend based on the recent average to isolate the seasonal trend from
+      \item less sensitive to a large deviation (such as lockdown) as attributed to noise compared to linear model
+      \item no confidence interval
+    \end{itemize}
   \end{itemize}
-  \item Time series Decomposition
-  \begin{itemize}
-    \item designed for time series
-    \item automatically finds an overall trend based on the recent average to isolate the seasonal trend from
-    \item less sensitive to a large deviation (such as lockdown) as attributed to noise compared to linear model
-    \item no confidence interval
-  \end{itemize}
-\end{itemize}
+  
+  In the end seems better to use Time series Decomposition for overall consumption trend but is still useful to see from the linear model without assuming any correlation between the months it still has very strong confidence intervals (p-value $< 2^{-16}$). Could be worth doing some more in depth using linear model and adding car as a factor.
 
-In the end seems better to use Time series Decomposition for overall
-consumption trend but is still useful to see from the linear model
-without assuming any correlation between the months it still has very
-strong confidence intervals (p-value \(< 2^{-16}\)). Could be worth
-doing some more in depth using linear model and adding car as a factor.
+\end{comment}
+
+A time series Decomposition is used to isolated the seasonal trend in
+consumption from the overall trend. This can be done for all regions of
+NZ combined and also for each region independently.
 
 \begin{figure}
 \centering
-\includegraphics{summary_week4_files/figure-latex/eff_decomp_plot-1.pdf}
-\caption{Decomposition of Multiplicative Consumption Time Series}
+\includegraphics{summary_week4_files/figure-latex/consum_decomp_plot-1.pdf}
+\caption{Multiplicative Time Series Decomposition of Flip the Fleet
+Average Consumption for all of NZ\label{fig:consum_decomp_plot}}
 \end{figure}
 
 The decomposition shows that the seasonal trend goes from 0.96 times the
 mean consumption in February to 1.07 times the mean consumption in
 March, A peak to peak difference of 10.7\%.
 
-Looking at the plot there is a very obvious seasonal trend to EV
-consumption. To compare this to I limit this to just Auckland EVs.
+Figure \ref{fig:consum_decomp_plot} shows a very clear seasonal trend
+within the Flip the Fleets EV's consumption. As NZ weather differs
+significantly by region, to test the hypothesis that EV consumption is
+correlated with heating degree days we must limit the comparison to a
+single region of Flip the Fleet data and its best corresponding weather
+region. Auckland is used as an example in \ref{fig:eff_HDD_plot} as it
+has the largest amount of data and is of most interest to Vector.
 
 \begin{figure}
 \centering
 \includegraphics{summary_week4_files/figure-latex/eff_HDD_plot-1.pdf}
-\caption{Auckland Seasonal component Decompostions}
+\caption{Auckland Seasonal component
+Decompostions\label{fig:eff_HDD_plot}}
 \end{figure}
 
 Within Auckland looking at the plot it is very clear that HDD and
@@ -223,7 +233,15 @@ and warm days contributing to a high usage of cabin temperature control
 increasing consumption but average temperature would not be able to show
 this.
 
-A linear model is used to model power consumption by HDD and CDD.
+\hypertarget{model}{%
+\subsection{Model}\label{model}}
+
+Due to this we propose using a linear model is used to model power
+consumption by HDD and CDD given by the formula
+
+\[ \eta = A_{CDD}{CDD} + A_{HDD}{HDD} + R + M + \epsilon\]
+
+\[ \eta = A_{CDD}{CDD} + A_{HDD}{HDD} + B_{R,M} + \epsilon\]
 
 As with the case of the adjusted monthly average power consumption
 (Wh/km) in the linear model a weighting is added to the points in order
@@ -269,11 +287,11 @@ baseline of Auckland and Nissan Leaf (24 kWh) 2013-2016 are used for the
 region and model as there is the most amount of data in them.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.41}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.14}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.16}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.12}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.16}}@{}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.4125}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1375}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1625}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1250}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1625}}@{}}
 \toprule
 \begin{minipage}[b]{\linewidth}\raggedright
 ~
@@ -326,10 +344,10 @@ modelPeugeot e-208 & 10.96 & 9.581 & 1.144 & 0.2525 \\
 \end{longtable}
 
 \begin{longtable}[]{@{}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.21}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.31}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.12}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.24}}@{}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2083}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.3056}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1250}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2361}}@{}}
 \caption{Fitting linear model: consumption \textasciitilde{} HDD + CDD +
 weather\_region + model}\tabularnewline
 \toprule
@@ -487,6 +505,9 @@ conjunction with the consumption linear model from above, with weather
 data from 2017 to 2021 matched to the best corresponding VKT regions and
 the vehicle model make up of the Flip the Fleet data.
 
+\hypertarget{predictions}{%
+\subsection{Predictions}\label{predictions}}
+
 Assumptions made are therefore,
 
 \begin{itemize}
@@ -596,15 +617,21 @@ in the winter.
 \centering
 \includegraphics{summary_week4_files/figure-latex/kea_power_usage-1.pdf}
 \caption{NZ EVs Power Usage per Month using EECAs kea VKT and Flip the
-Fleets Average Consumption}
+Fleets Average Consumption\label{fig:kea_power_usage}}
 \end{figure}
 
 \begin{figure}
 \centering
 \includegraphics{summary_week4_files/figure-latex/tui_power_usage-1.pdf}
 \caption{NZ EVs Power Usage per Month using EECAs Tui VKT and Flip the
-Fleets Average Consumption}
+Fleets Average Consumption\label{fig:tui_power_usage}}
 \end{figure}
+
+This consumption used to plot figure \ref{fig:vehicle_consum} can also
+be combined with the EECA's Times Models expected EV VKT we can get an
+estimate for power usage used each month of the year based on the kea
+(Fig \ref{fig:kea_power_usage}) and tui (Fig \ref{fig:tui_power_usage})
+scenario VKT and Flip the Fleet consumption data.
 
 \begin{thebibliography}{9}
 \bibitem{ev_range}

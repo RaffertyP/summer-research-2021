@@ -9,6 +9,7 @@ output:
 header-includes: 
  - \usepackage{float}
  - \floatplacement{figure}{H}
+ - \usepackage{comment}
 
 ---
 
@@ -74,18 +75,18 @@ Fuel trade data including quarterly petrol usage for domestic transport in New Z
 
 Vehicle kilometers traveled (VKT) data including quarterly data of 10 regions plus one "other" region was given by Haobo Wang from NZTA for use in this project. Further data on yearly VKT for the "other" regions, the vehicle fuel type and vehicle type was collected from the publicly available fleet statistics page on NZTA's website.
 
-Using the regional hourly temperatures, monthly heating degree days (HDD) and cooling degree days (CDD) were imputed using base temperatures of 16$^\circ$C and 22$^\circ$C respectively.  The base temperatures were selected to represent the range of comfortable temperatures for most people, as research shows that a majority of the seasonal variation in EV efficiency is due to cabin temperature control\cite{ev_range}. 
+The base temperatures were selected to represent the range of comfortable temperatures for most people, as research shows that a majority of the seasonal variation in EV efficiency is due to cabin temperature control\cite{ev_range}. Using the regional hourly temperatures, monthly heating degree days (HDD) and cooling degree days (CDD) were imputed using base temperatures of 16$^\circ$C and 22$^\circ$C respectively. 
 
 The HDD and CDD was then divided by the length of the month so that HDD and CDD corresponds to average heating degrees days per day for the month. This is so that when comparing to other statistics such as efficiency that are averaged out rather than summed so there is less bias.
 
 The calculated monthly weather statistics by region was then added to the monthly EV data based on the regions of vehicle. This assumes that vehicle stays in it's own region for a majority of the time. 
 
 
-A monthly adjusted average was calculated for the whole of New Zealand and then for each region of NZ. The monthly averages were adjusted by weighting using the distance traveled to give more weighting to vehicles with higher km traveled in that month. this was done using the formula $$\bar{x} = \frac{\sum_{i}^{n} (d_i\times x_i)}{\left(\sum_{i}^{n} d_i\right)\times n}$$
+A monthly weighted average was calculated for the whole of New Zealand and then for each region of NZ. The monthly averages were weighted using the distance traveled to give more weighting to vehicles with higher km traveled in that month. this was done using the formula $$\bar{x} = \frac{\sum_{i}^{n} (d_i\times x_i)}{\left(\sum_{i}^{n} d_i\right)\times n}$$
 
 Power consumption (Wh/km) was calculated using the efficiency (km/kWh). This will be used instead of efficiency in the modeling for reasons that will become apparent later in the analysis. 
 
-## Results
+## Data Exploration 
 
 ```{r eff_plot, fig.cap="Time Series of EV Consumption"}
 plot(monthly_EV_data$m, monthly_EV_data$mean_consum, type = 'l', xaxt = "n", xlab = "", ylab = "Mean consumption of EVs (Wh/km)", las = 1)
@@ -94,31 +95,36 @@ yearly_line()
 ```
 
 
-Plotting monthly average consumption for all of NZ we can see that there is a very clear seasonal trend.
+Plotting monthly average consumption of Flip the Fleets vehicles in all of NZ we can see that there is a very clear seasonal trend.
 
+\begin{comment}
 
-Used 2 different methods of decomposition of the seasonal trend of consumption.
-\begin{itemize}
-  \item Linear model with each month as an independent factor
   \begin{itemize}
-    \item offers more control and flexibility (could add vehicle type etc in further analysis)
-    \item shows confidence interval
-    \item requires to define an arbitrary function that can fit to the overall trend to separate from seasonal trend
-    \item least squares is sensitive to single large deviation that could just be outlier (such as lockdown)
+    \item Linear model with each month as an independent factor
+    \begin{itemize}
+      \item offers more control and flexibility (could add vehicle type etc in further analysis)
+      \item shows confidence interval
+      \item requires to define an arbitrary function that can fit to the overall trend to separate from seasonal trend
+      \item least squares is sensitive to single large deviation that could just be outlier (such as lockdown)
+    \end{itemize}
+    \item Time series Decomposition
+    \begin{itemize}
+      \item designed for time series
+      \item automatically finds an overall trend based on the recent average to isolate the seasonal trend from
+      \item less sensitive to a large deviation (such as lockdown) as attributed to noise compared to linear model
+      \item no confidence interval
+    \end{itemize}
   \end{itemize}
-  \item Time series Decomposition
-  \begin{itemize}
-    \item designed for time series
-    \item automatically finds an overall trend based on the recent average to isolate the seasonal trend from
-    \item less sensitive to a large deviation (such as lockdown) as attributed to noise compared to linear model
-    \item no confidence interval
-  \end{itemize}
-\end{itemize}
+  
+  In the end seems better to use Time series Decomposition for overall consumption trend but is still useful to see from the linear model without assuming any correlation between the months it still has very strong confidence intervals (p-value $< 2^{-16}$). Could be worth doing some more in depth using linear model and adding car as a factor.
 
-In the end seems better to use Time series Decomposition for overall consumption trend but is still useful to see from the linear model without assuming any correlation between the months it still has very strong confidence intervals (p-value $< 2^{-16}$). Could be worth doing some more in depth using linear model and adding car as a factor.
+\end{comment}
+
+A time series Decomposition is used to isolated the seasonal trend in consumption from the overall trend. This can be done for all regions of NZ combined and also for each region independently. 
 
 
-```{r eff_decomp_plot, fig.cap = "Decomposition of Multiplicative Consumption Time Series", message = FALSE, warning = FALSE, fig.height = 6}
+
+```{r consum_decomp_plot, fig.cap = "Multiplicative Time Series Decomposition of Flip the Fleet Average Consumption for all of NZ\\label{fig:consum_decomp_plot}", message = FALSE, warning = FALSE, fig.height = 6}
 decomp_consum = monthly_EV_data$mean_consum %>% 
   ts(frequency = 12, start = 2017) %>% 
   decompose("multiplicative")
@@ -130,11 +136,11 @@ plot_decomp(decomp_consum, title = "", ylab = "Consumption")
 
 The decomposition shows that the seasonal trend goes from `r signif(min(decomp_consum$figure),2)` times the mean consumption in February to `r round(max(decomp_consum$figure),2)` times the mean consumption in March, A peak to peak difference of `r  round(abs(max(decomp_consum$figure)/min(decomp_consum$figure)-1)*100, 1)`\%. 
 
+Figure \ref{fig:consum_decomp_plot} shows a very clear seasonal trend within the Flip the Fleets EV's consumption. As NZ weather differs significantly by region, to test the hypothesis that EV consumption is correlated with heating degree days we must limit the comparison to a single region of Flip the Fleet data and its best corresponding weather region. Auckland is used as an example in \ref{fig:eff_HDD_plot} as it has the largest amount of data and is of most interest to Vector. 
 
 
-Looking at the plot there is a very obvious seasonal trend to EV consumption. To compare this to I limit this to just Auckland EVs.
 
-```{r eff_HDD_plot, fig.cap = "Auckland Seasonal component Decompostions", warning = FALSE}
+```{r eff_HDD_plot, fig.cap = "Auckland Seasonal component Decompostions\\label{fig:eff_HDD_plot}", warning = FALSE}
 auck_consum_series = ts(monthly_reg_EV_data$mean_consum[which(monthly_reg_EV_data$weather_region == "Auckland")], frequency = 12)
 decomp_auck_consum = decompose(auck_consum_series,"multiplicative")
 auck_HDD_series = ts(monthly_reg_EV_data$HDD[monthly_reg_EV_data$weather_region == "Auckland"], frequency = 12)
@@ -167,8 +173,13 @@ monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>%
 
 Further looking into this we can see that in Auckland as the average temperature of the month starts increasing past 17.5°C there appears to be a trend towards increasing EV consumption. As stated before research \cite{ev_range} suggested AC also increases consumption of the EV. This suggest it may be worth including cooling degree days and heating degree days in analysis. This could also be useful to explain the points well above the trend line that may be from a month where there was both cold and warm days contributing to a high usage of cabin temperature control increasing consumption but average temperature would not be able to show this. 
 
+## Model
 
-A linear model is used to model power consumption by HDD and CDD.
+Due to this we propose using a linear model is used to model power consumption by HDD and CDD given by the formula
+
+$$ \eta = A_{CDD}{CDD} + A_{HDD}{HDD} + R + M + \epsilon$$
+
+$$ \eta = A_{CDD}{CDD} + A_{HDD}{HDD} + B_{R,M} + \epsilon$$
 
 As with the case of the adjusted monthly average power consumption (Wh/km) in the linear model a weighting is added to the points in order to give more weighting to cars with longer distance traveled. This may give a slight bias towards EVs with proportionally higher highway mileage. However, from the electricity grids perspective it makes sense to give less weighting to cars that have traveled 0 or very low km. Mathematically this means instead of estimating the coefficients by minimizing the RSS given by the function $\sum_{i =1}^{n}(y_{i}-\hat{y}_{i})^2$ we minimize the function $\sum_{i =1}^{n}d \cdot(y_{i}-\hat{y}_{i})^2$ where $d$ is the distance traveled by a car in that month, $y_{i}$ is the actual power consumption, and $\hat{y}_{i}$ is the power consumption of that vehicle as predicted by the model.
 
@@ -270,6 +281,8 @@ Looking at the Seasonal trend of Petrol Usage and VKT data from NZTA we can see 
 Looking at the seasonal trend of EV consumption we can see much larger increase in consumption in the winter months with average consumption in July being `r round(abs(max(decomp_consum$figure)/min(decomp_consum$figure)-1)*100, 1)`\% higher consumption than in February. From the plot we can see that when consumption of EVs increases, VKT goes down, suggesting that some increase in total power usage due to EVs increase in consumption will be countered by the decrease in VKT. However, the increase in consumption is much larger than than the decrease in VKT. This combined with the fact that winter is when our electricity grid in New Zealand is already under strain due to heating demand suggests that if we ignore the relatively small change in VKT in our model we can effectively model a worst case scenario.
 
 In order to predict the the effect that EVs will have on New Zealands electricity grid the yearly regional VKT data from 2019 in used in conjunction with the consumption linear model from above, with weather data from 2017 to 2021 matched to the best corresponding VKT regions and the vehicle model make up of the Flip the Fleet data. 
+
+## Predictions
 
 Assumptions made are therefore,
 \begin{itemize}
@@ -392,7 +405,7 @@ limit_power_usage %>%
 Combining the regional consumption used to plot figure \ref{fig:vehicle_consum} with the 2019 VKT number we can get an expected power usage for all of NZ and also for each VKT region. Figure \ref{fig:vehicle_power_usage} shows with a 100% EV penetration and an EV fleet comparable to the Flip the Fleet, the monthly power usage for all of NZ goes from `r round(min(power_usage$total_fit),0)` GWh minimum in the summer to `r round(max(power_usage$total_fit),0)` GWh maximum power usage in the winter. If the fleet consisted of heavier less efficient vehicles like the Tesla Model S this would increase to `r round(min(limit_power_usage$tesla_s),0)` GWh minimum in the summer to `r round(max(limit_power_usage$tesla_s),0)` GWh maximum power usage in the winter. Figure \ref{fig:vehicle_power_usage_auck} shows with a 100% EV penetration and an EV fleet comparable to the Flip the Fleet, the monthly power usage of Auckland goes from `r round(min(power_usage$Auckland_fit),0)` GWh minimum in the summer to `r round(max(power_usage$Auckland_fit),0)` GWh maximum power usage in the winter. If the fleet consisted of heavier less efficient vehicles like the Tesla Model S this would increase to `r round(min(limit_power_usage$"Auckland_Tesla Model S"),0)` GWh minimum in the summer to `r round(max(limit_power_usage$"Auckland_Tesla Model S"),0)` GWh maximum power usage in the winter.
 
 
-```{r kea_power_usage, fig.cap="NZ EVs Power Usage per Month using EECAs kea VKT and Flip the Fleets Average Consumption"}
+```{r kea_power_usage, fig.cap="NZ EVs Power Usage per Month using EECAs kea VKT and Flip the Fleets Average Consumption\\label{fig:kea_power_usage}"}
 kea_power_usage[kea_power_usage$Region == "total" & kea_power_usage$year %in% c(2018,2030,2040,2050,2060),] %>% 
   mutate(across(year, as.factor)) %>%
   ggplot(aes(x = month, y = value, color = year)) +
@@ -406,7 +419,7 @@ kea_power_usage[kea_power_usage$Region == "total" & kea_power_usage$year %in% c(
 
 
 
-```{r tui_power_usage, fig.cap="NZ EVs Power Usage per Month using EECAs Tui VKT and Flip the Fleets Average Consumption"}
+```{r tui_power_usage, fig.cap="NZ EVs Power Usage per Month using EECAs Tui VKT and Flip the Fleets Average Consumption\\label{fig:tui_power_usage}"}
 tui_power_usage[tui_power_usage$Region == "total" & tui_power_usage$year %in% c(2018,2030,2040,2050,2060),] %>% 
   mutate(across(year, as.factor)) %>%
   ggplot(aes(x = month, y = value, color = year)) +
@@ -417,6 +430,10 @@ tui_power_usage[tui_power_usage$Region == "total" & tui_power_usage$year %in% c(
     geom_line() +
     gg_theme
 ```
+
+
+This consumption used to plot figure \ref{fig:vehicle_consum} can also be combined with the EECA's Times Models expected EV VKT we can get an estimate for power usage used each month of the year based on the kea (Fig \ref{fig:kea_power_usage}) and tui (Fig \ref{fig:tui_power_usage}) scenario VKT and Flip the Fleet consumption data. 
+
 
 \begin{thebibliography}{9}
 \bibitem{ev_range}
