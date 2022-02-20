@@ -29,7 +29,8 @@ load("processed_data/EV_weather_data.rda")
 
 ```{r}
 #not strictly a log x axis so that zero can be represented. axis labels are right
-plot(EV_data$distance + 1, EV_data$consumption, pch = 4,log = "x", ylab = "Power usage (kWh/km)", xlab = "distance driven (km)", xaxt = "n")
+plot(EV_data$distance + 1, EV_data$consumption, pch = 4,log = "x", 
+     ylab = "Power usage (kWh/km)", xlab = "distance driven (km)", xaxt = "n")
 axis(1, c(0,10,100,1000,10000), at = c(1,9,99,999,9999))
 ```
 
@@ -37,12 +38,17 @@ axis(1, c(0,10,100,1000,10000), at = c(1,9,99,999,9999))
 
 ```{r, message = FALSE}
 #bad data vehicles
-EV_data = EV_data[EV_data$vehicle != "38f81643" & EV_data$vehicle != "d6082525" & EV_data$vehicle != "ae05b6a6" & EV_data$vehicle != "667822bd" & EV_data$vehicle != "ad7a2a1e" & EV_data$vehicle != "88ee3e2d" & EV_data$vehicle != "e6959846"& EV_data$vehicle != "8a170585" & EV_data$vehicle != "ea66a66d", ]
+EV_data = EV_data[EV_data$vehicle != "38f81643" & EV_data$vehicle != "d6082525" & 
+                    EV_data$vehicle != "ae05b6a6" & EV_data$vehicle != "667822bd" &
+                    EV_data$vehicle != "ad7a2a1e" & EV_data$vehicle != "88ee3e2d" &
+                    EV_data$vehicle != "e6959846"& EV_data$vehicle != "8a170585" & 
+                    EV_data$vehicle != "ea66a66d", ]
 
 ```
 
 ```{r}
-plot(EV_data$distance + 1,EV_data$efficiency, pch = 4,log = "x", ylab = "Power usage (kWh/km)", xlab = "distance driven (km)", xaxt = "n")
+plot(EV_data$distance + 1,EV_data$efficiency, pch = 4,log = "x", 
+     ylab = "Power usage (kWh/km)", xlab = "distance driven (km)", xaxt = "n")
 axis(1, c(0,10,100,1000,10000), at = c(1,9,99,999,9999))
 ```
 
@@ -62,33 +68,39 @@ EV_data %>%
 
 
 ```{r}
-plot(monthly_EV_data$m, monthly_EV_data$mean_ef, type = 'l', xaxt = "n", xlab = "", ylab = "Mean efficiency of EVs (km/kWh)", main = "Time series of EV efficiencies")
-axis(1,labels = paste(monthly_EV_data$year, monthly_EV_data$month, sep = "-"), at = monthly_EV_data$m, las = 2,srt = 35)
+plot(monthly_EV_data$m, monthly_EV_data$mean_ef, type = 'l', xaxt = "n", xlab = "", 
+     ylab = "Mean efficiency of EVs (km/kWh)", main = "Time series of EV efficiencies")
+axis(1,labels = paste(monthly_EV_data$year, monthly_EV_data$month, sep = "-"), 
+     at = monthly_EV_data$m, las = 2,srt = 35)
 
 yearly_line()
 ```
-simple linear model with mean_eff $= t + \ln t + t^2 +$month (as factor). negative squared term means can not use for long term efficiency trend as it will got negative but allows it to better fit the seasonal trend
+Simple linear model with mean_eff $= t + \ln t + t^2 +$month (as factor). Negative squared term means can not use for long term efficiency trend as it will become negative but allows it to better fit the seasonal trend.
 
 
 ```{r}
-monthly_eff_qm_log = lm(mean_ef ~ m+I(log(m))+I(m^2)+factor(month),data = monthly_EV_data)
+monthly_eff_qm_log = lm(mean_ef ~ m+I(log(m))+I(m^2)+factor(month),
+                        data = monthly_EV_data)
 summary(monthly_eff_qm_log)
 ```
 
 
 ```{r}
-plot(monthly_EV_data$m, monthly_EV_data$mean_ef, type = 'l', xaxt = "n", xlab = "", ylab = "Mean efficiency of EVs (km/kWh)", main = "Time series of EV efficiencies")
+plot(monthly_EV_data$m, monthly_EV_data$mean_ef, type = 'l', xaxt = "n", xlab = "", 
+     ylab = "Mean efficiency of EVs (km/kWh)", main = "Time series of EV efficiencies")
 lines(monthly_EV_data$m, predict(monthly_eff_qm_log), col = 'red', lty = 2)
 
 yearly_line()
-axis(1,labels = paste(monthly_EV_data$year, monthly_EV_data$month, sep = "-"), at = monthly_EV_data$m, las = 2,srt = 35)
-legend("topleft", legend = c("Actual mean EV efficiency", "Modelled prediction EV efficiency"), lty = 1:2, col = 1:2)
+axis(1,labels = paste(monthly_EV_data$year, monthly_EV_data$month, sep = "-"), 
+     at = monthly_EV_data$m, las = 2,srt = 35)
+legend("topleft", legend = c("Actual mean EV efficiency", 
+                             "Modelled prediction EV efficiency"), lty = 1:2, col = 1:2)
 ```
 ```{r}
 eff_series = ts(monthly_EV_data$mean_ef, frequency = 12)
 adf.test(eff_series, alternative = "stationary")
 ```
-we can reject null hypothesis that data is not-stationary. this makes sense as average efficiency should not have significantly changed in a couple of years. use multiplicative instead of additive as preferable to know estimated extra power use? or should i know total extra power used in season?
+We can reject null hypothesis that data is not-stationary. This makes sense as average efficiency should not have significantly changed in a couple of years. Use multiplicative instead of additive as preferable to know estimated extra power use? or should i know total extra power used in season?
 
 
 ```{r}
@@ -99,29 +111,36 @@ yearly_line(period = 1)
 ```
 
 ```{r}
-plot(decomp_eff$figure, type = 'l', main = "Seasonal component of Efficiency of EV", xaxt = "n",
+plot(decomp_eff$figure, type = 'l', main = "Seasonal component of Efficiency of EV", 
+     xaxt = "n",
      xlab = "", ylab = "Change in efficiency (km/kWh)")
-points(1:12, scale(c(0,monthly_eff_qm_log$coefficients[paste("factor(month)", 2:12, sep = "")]),scale = F),
+points(1:12, scale(c(0,monthly_eff_qm_log$coefficients[paste("factor(month)", 2:12, 
+                                                             sep = "")]),scale = F),
        type = 'l', col = "red")
 axis(1, labels = month.name, at = 1:12, las = 3)
-legend("top", legend = c("Seasonal compontent Decompostion", 'Seasonal compontent of linear model'), lty = 1, col = 1:2)
+legend("top", legend = c("Seasonal compontent Decompostion", 
+                         'Seasonal compontent of linear model'), lty = 1, col = 1:2)
 ```
 will only do for Auckland as too many lines would get crowded
 
 ```{r eff_HDD_plot, warning=FALSE}
-auck_eff_series = ts(monthly_reg_EV_data$mean_ef[which(monthly_reg_EV_data$weather_region == "Auckland")], frequency = 12)
-decomp_auck_eff = decompose(auck_eff_series,"multiplicative")
-auck_HDD_series = ts(monthly_reg_EV_data$HDD[monthly_reg_EV_data$weather_region == "Auckland"], frequency = 12)
+auck_eff_series = ts(monthly_reg_EV_data$mean_ef[
+  which(monthly_reg_EV_data$weather_region == "Auckland")], frequency = 12)
+decomp_auck_eff = decompose(auck_eff_series, "multiplicative")
+auck_HDD_series = ts(monthly_reg_EV_data$HDD[
+  monthly_reg_EV_data$weather_region == "Auckland"], frequency = 12)
 decomp_auck_HDD = decompose(auck_HDD_series,"multiplicative")
 
 par(mar = c(4, 4, 2, 4))
-plot(decomp_auck_eff$figure, type = 'b', main = "Auckland Seasonal component Decompostions", xaxt = "n",
+plot(decomp_auck_eff$figure, type = 'b', 
+     main = "Auckland Seasonal component Decompostions", xaxt = "n",
      xlab = "", ylab = "Change in efficiency (km/kWh)")
 axis(1, labels = month.abb, at = 1:12, las = 3)
 
 par(new=TRUE)
 plot(decomp_auck_HDD$figure, type = 'b', col = 2, xlab="", ylab="",axes=FALSE)
-mtext("Average Heating Degree (° Days per Day) (Base temp 16°C)",side=4,line=2, cex = 1) 
+mtext("Average Heating Degree (° Days per Day) (Base temp 16°C)",
+      side=4,line=2, cex = 1) 
 axis(4)
 
 legend("topright", legend = c("EV efficiency", "HDD"), lty = 1, col = 1:2)
@@ -132,23 +151,31 @@ intercept base line is Nissan Leaf (24 kWh) 2013-2016
 eff_lm = lm(efficiency ~ HDD + model, data = EV_data, na.action=na.omit)
 summary(eff_lm)
 ```
-different city weather stations may be measuring colder or warmer regions of the city and therefore may need a slightly different scaling. interesting that Rotorua has lower effect on HDD, could be cause Rotorua is inland Bay of Plenty so its temperature change is more significant that coastal Tauranga which would also be included in bay of plenty.
+Different city weather stations may be measuring colder or warmer regions of the city and therefore may need a slightly different scaling. Interesting that Rotorua has lower effect on HDD, could be cause Rotorua is inland Bay of Plenty so its temperature change is more significant that coastal Tauranga which would also be included in bay of plenty.
 ```{r}
-eff_reg_lm = lm(efficiency ~ HDD + CDD + weather_region + model, data = EV_data, na.action=na.omit)
+eff_reg_lm = lm(efficiency ~ HDD + CDD + weather_region + model, data = EV_data, 
+                na.action=na.omit)
 summary(eff_reg_lm)
 ```
 
 https://www.geotab.com/blog/ev-range/
 
-based on this AC should also decrease range. not too obvious in NZ as is kind of cold but in Auckland can see such a trend
+Based on this AC should also decrease range. Not too obvious in NZ as is kind of cold but in Auckland can see such a trend
 what if we include cooling degree days in analysis too? unlike this direct average temp vs efficiency plot this would allow for cooling and heating in the same month that could reduce efficiency. could explain the couple month that have very bad efficiency, possibley have a few cold and warm days but average is nothing unsual 
 
 ```{r temp_eff_plot, message=FALSE}
-monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>% ggplot(aes(avg_temp, mean_ef)) + geom_point() + geom_smooth(method = 'loess')
+monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>% 
+  ggplot(aes(avg_temp, mean_ef)) + 
+  geom_point() + 
+  geom_smooth(method = 'loess') +
+  theme_minimal() +
+  labs(x = "Mean efficiency", "Average temperature")
+  
 ```
 
 ```{r}
-eff_h_c_lm = lm(consumption ~ HDD + CDD + weather_region + model, data = EV_data, na.action=na.omit, weights = distance)
+eff_h_c_lm = lm(consumption ~ HDD + CDD + weather_region + model, data = EV_data, 
+                na.action=na.omit, weights = distance)
 summary(eff_h_c_lm)
 ```
 
@@ -158,7 +185,7 @@ summary(eff_h_c_lm)
 plot(eff_reg_lm)
 plot(eff_h_c_lm)
 ```
-cooling degree days does explain extra variance but not much. likely as not many cooling days above 20 in nz
+Cooling degree days does explain extra variance but not much. Likely as not many cooling days above 20$^\circ$C in NZ.
 ```{r}
 anova(eff_lm, eff_reg_lm, eff_h_c_lm)
 ```
