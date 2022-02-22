@@ -4,6 +4,10 @@
 %
 \documentclass[
 ]{article}
+\title{Quick summary}
+\author{Pablo Paulsen}
+\date{06/12/2021}
+
 \usepackage{amsmath,amssymb}
 \usepackage{lmodern}
 \usepackage{iftex}
@@ -76,10 +80,6 @@
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
 
-\title{Quick summary}
-\author{Pablo Paulsen}
-\date{06/12/2021}
-
 \begin{document}
 \maketitle
 
@@ -132,10 +132,10 @@ The calculated monthly weather statistics by region was then added to
 the monthly EV data based on the regions of vehicle. This assumes that
 vehicle stays in it's own region for a majority of the time.
 
-A monthly adjusted average was calculated for the whole of New Zealand
-and then for each region of NZ. The monthly averages were adjusted by
-weighting using the distance traveled to give more weighting to vehicles
-with higher km traveled in that month. this was done using the formula
+A monthly weighted average was calculated for the whole of New Zealand
+and then for each region of NZ. The monthly averages were weighted using
+the distance traveled to give more weighting to vehicles with higher km
+traveled in that month. this was done using the formula
 \[\bar{x} = \frac{\sum_{i}^{n} (d_i\times x_i)}{\left(\sum_{i}^{n} d_i\right)\times n}\]
 
 Power consumption (Wh/km) was calculated using the efficiency (km/kWh).
@@ -199,6 +199,8 @@ correlated with heating degree days we must limit the comparison to a
 single region of Flip the Fleet data and its best corresponding weather
 region. Auckland is used as an example in \ref{fig:eff_HDD_plot} as it
 has the largest amount of data and is of most interest to Vector.
+
+\includegraphics{summary_week4_files/figure-latex/unnamed-chunk-1-1.pdf}
 
 \begin{figure}
 \centering
@@ -287,11 +289,11 @@ baseline of Auckland and Nissan Leaf (24 kWh) 2013-2016 are used for the
 region and model as there is the most amount of data in them.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.4125}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1375}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1625}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1250}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1625}}@{}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.41}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.14}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.16}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.12}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.16}}@{}}
 \toprule
 \begin{minipage}[b]{\linewidth}\raggedright
 ~
@@ -344,10 +346,10 @@ modelPeugeot e-208 & 10.96 & 9.581 & 1.144 & 0.2525 \\
 \end{longtable}
 
 \begin{longtable}[]{@{}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2083}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.3056}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1250}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2361}}@{}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.21}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.31}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.12}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.24}}@{}}
 \caption{Fitting linear model: consumption \textasciitilde{} HDD + CDD +
 weather\_region + model}\tabularnewline
 \toprule
@@ -420,11 +422,8 @@ by light passenger vehicles. Will be just combining regular petrol and
 premium for analysis. (Premium used to be more popular. Was there a
 definition change on premium and regular used in the data?)
 
-\begin{figure}
-\centering
 \includegraphics{summary_week4_files/figure-latex/petrol_ts-1.pdf}
-\caption{Decomposition of Multiplicative Petrol Usage Time Series}
-\end{figure}
+\includegraphics{summary_week4_files/figure-latex/unnamed-chunk-2-1.pdf}
 
 Fuel trade data from 2020 was excluded as lockdowns were not an accurate
 representation of the general driving patterns of the NZ population.
@@ -441,6 +440,8 @@ WoF/CoF odometer \cite{NZTA_VKT}.
 \includegraphics{summary_week4_files/figure-latex/VKT_ts-1.pdf}
 \caption{Decomposition of NZ VKT Time Series}
 \end{figure}
+
+\includegraphics{summary_week4_files/figure-latex/unnamed-chunk-3-1.pdf}
 
 The time series decomposition of the NZ VKT data shows a clear seasonal
 trend, albeit smaller than the trend from the fuel sales data. There is,

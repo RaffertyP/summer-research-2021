@@ -138,6 +138,11 @@ The decomposition shows that the seasonal trend goes from `r signif(min(decomp_c
 
 Figure \ref{fig:consum_decomp_plot} shows a very clear seasonal trend within the Flip the Fleets EV's consumption. As NZ weather differs significantly by region, to test the hypothesis that EV consumption is correlated with heating degree days we must limit the comparison to a single region of Flip the Fleet data and its best corresponding weather region. Auckland is used as an example in \ref{fig:eff_HDD_plot} as it has the largest amount of data and is of most interest to Vector. 
 
+```{r}
+acf(decomp_consum$x)
+```
+
+
 
 
 ```{r eff_HDD_plot, fig.cap = "Auckland Seasonal component Decompostions\\label{fig:eff_HDD_plot}", warning = FALSE}
@@ -233,6 +238,9 @@ decomp_petrol = fuel_trade$Petrol[fuel_trade$year < 2020] %>%
 
 plot_decomp(decomp_petrol, ylab = "Fuel usage (L)")
 ```
+```{r}
+acf(decomp_petrol$x-min(decomp_petrol$x))
+```
 
 
 Fuel trade data from 2020 was excluded as lockdowns were not an accurate representation of the general driving patterns of the NZ population. Looking at the decomposition above there is a clear seasonal trend however it not that significant and is smaller than the larger deviations of the random variations.
@@ -247,6 +255,9 @@ decomp_vkt = vkt_quart[vkt_quart$year >= 2003,]$total %>%
 plot_decomp(decomp_vkt, ylab = "Million km travelled", breaks = 10)
 ```
 
+```{r}
+acf(decomp_vkt$x)
+```
 
 The time series decomposition of the NZ VKT data shows a clear seasonal trend, albeit smaller than the trend from the fuel sales data. There is, however, clearly a large amount of smoothing going on with this data. This is shown in a couple of different ways including.
 
@@ -267,8 +278,6 @@ plot(decomp_consum$figure, type = 'b', xaxt = "n",
 axis(1, labels = month.abb, at = 1:12, las = 1)
 
 points(unique(fuel_trade$month)-1,decomp_petrol$figure, type = 'b', col = 2, xlab="", ylab="")
-#mtext("Change in Petrol usage",side=4,line=2, cex = 1, col = 2) 
-#axis(4, col = 2)
 
 points(c(2,5,8,11), decomp_vkt$figure, type = 'b', col = 3, xlab="", ylab="")
 
