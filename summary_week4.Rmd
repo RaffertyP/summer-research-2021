@@ -205,6 +205,7 @@ summary(eff_lm_model) %>% pander
 ```
 
 
+
 The HDD term suggests that as the average number of heating degree days per days increases by 1 the average power consumption of EVs for the month increases by `r formatC(eff_lm_model$coefficients["HDD"], digits=3, format="fg", flag="#")`Wh/km. With a p-value of $<2\times10^{-16}$ we are quite confident on this value. 
 
 The CDD term suggests that as the average number of cooling degree days per days increases by 1 the average power consumption of EVs for the month increases by `r formatC(eff_lm_model$coefficients["CDD"], digits=3, format="fg", flag="#")`Wh/km. With a p-value of $4.11\times10^{-5}$ we are less confident on this value. This is likely as there is much less data in New Zealand regarding cooling degree days as NZ is a much cooler climate compared to where a lot of the other research on EVs is going on. 

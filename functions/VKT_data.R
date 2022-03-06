@@ -14,6 +14,10 @@ names(vkt_yearly)[1] = "year"
 #creates VKT of passenger vehicles
 #under the assumption that proportion of large vehicles and passenger vehicles is same in all regions
 vkt_pass = cbind(year = vkt_yearly$year,vkt_yearly[,-1]*(vkt_type_yearly$Light.passenger.vehicles/vkt_type_yearly$total))
+vkt_type_quart = vkt_type_yearly %>%
+                    filter(Year >= 2002) %>% 
+                    slice(rep(1:n(), each = 4))
+vkt_quart_pass = cbind(year = vkt_quart$year, quarterly = vkt_quart$quarterly, vkt_quart[,-c(1,2)]*(vkt_type_quart$Light.passenger.vehicles/vkt_type_quart$total))
 
 #list index (first) is the VKT region to use and value (second) is the weather data region to use
 vkt_regions = list("Northland" = "Auckland", "Auckland" = "Auckland", "Gisborne" = "Gisborne", "Hawkes.Bay" = "Napier", "Taranaki" = "Stratford", "Manawatu.Wanganui" = "Palmerston North", "Wellington" = "Upper Hutt", "Nelson.Marlborough" = "Nelson", "Canterbury" = "Christchurch", "Southland" = "Invercargill", "Waikato" = "Hamilton", "Bay.of.Plenty" = "Rotorua", "West.Coast" = "Greymouth Aero Ews", "Otago" = "Dunedin")
@@ -32,6 +36,6 @@ times_kea_VKT$consumption = times_kea_VKT$power_usage/times_kea_VKT$Electricity
 times_tui_VKT$consumption = times_tui_VKT$power_usage/times_tui_VKT$Electricity
 
 
-save(vkt_quart, vkt_yearly, vkt_regions, vkt_pass,times_kea_VKT, times_tui_VKT, file = "processed_data/VKT_data.rda")
+save(vkt_quart, vkt_quart_pass, vkt_yearly, vkt_regions, vkt_pass, times_kea_VKT, times_tui_VKT, file = "processed_data/VKT_data.rda")
 
 rm(list = ls())

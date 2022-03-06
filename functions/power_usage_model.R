@@ -1,3 +1,11 @@
+# 
+# EV_data_matrix = data.frame(model.matrix(consumption ~ HDD + CDD + weather_region + model,EV_data)[,-1])
+# eff_lm_model = lm(EV_data$consumption ~ ., data = EV_data_matrix, na.action=na.omit, weights = EV_data$distance)
+# new_EV_data_matrix = EV_data_matrix[1,][-1,]
+# new_EV_data_matrix[1,] = 0
+# save(eff_lm_model, new_EV_data_matrix, file = "processed_data/matrix_lm_model.rda")
+
+
 load(file = "processed_data/matrix_lm_model.rda")
 #' Title
 #'
@@ -11,13 +19,6 @@ load(file = "processed_data/matrix_lm_model.rda")
 #'
 #' @examples
 car_power_consumption = function(HDD = 0, CDD = 0, region = 0, car_model = model_pop$freq[-1]) {
-
-
-    # EV_data_matrix = data.frame(model.matrix(consumption ~ HDD + CDD + weather_region + model,EV_data)[,-1])
-    # eff_lm_model = lm(EV_data$consumption ~ ., data = EV_data_matrix, na.action=na.omit, weights = EV_data$distance)
-    # new_EV_data_matrix = EV_data_matrix[1,][-1,]
-    # new_EV_data_matrix[1,] = 0
-    # save(eff_lm_model, new_EV_data_matrix, file = "processed_data/matrix_lm_model.rda")
 
 
 
@@ -44,7 +45,7 @@ calc_region_usage = function(vkt, weather_region, HDD = 0, CDD = 0, car_model = 
 
 
 comb_vkt_consumption = function(vkt_region, HDD = 0, CDD = 0, car_model = model_pop$freq[-1]) {
-    vkt = vkt_pass[vkt_yearly$year == 2019, vkt_region] / 12
+    vkt = vkt_pass[vkt_pass$year == 2019, vkt_region] / 12
     weather_region = vkt_regions[vkt_region]
 
     return(calc_region_usage(vkt, weather_region, HDD, CDD, car_model))
