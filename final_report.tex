@@ -103,17 +103,17 @@ well as the region of the vehicle was collected from the on-board
 computers of 1259 electric vehicles (EV) between 2017 and 2021 by Flip
 the Fleet \cite{ftf}.
 
-A monthly weighted average energy efficiency was calculated for the
-whole of New Zealand and then for each region. The monthly averages were
-weighted using the distance traveled to give more weighting to vehicles
-with higher km traveled in that month. This was done using the formula
-
-\[\bar{x} = \frac{\sum_{i}^{n} (d_i\times x_i)}{\left(\sum_{i}^{n} d_i\right)\times n}\]
-
 Energy economy (Wh/km) was calculated as the inverse of efficiency
 (km/kWh). Energy economy will be used instead of efficiency in the
 modelling in this work for reasons that will become apparent later in
 the analysis.
+
+A monthly weighted average energy economy was calculated for the whole
+of New Zealand and then for each region. The monthly averages were
+weighted using the distance traveled to give more weighting to vehicles
+with higher km traveled in that month. This was done using the formula
+
+\[\bar{x} = \frac{\sum_{i}^{n} (d_i\times x_i)}{\left(\sum_{i}^{n} d_i\right)\times n}\]
 
 \begin{figure}
 \centering
@@ -255,14 +255,14 @@ The autocorrelation plot (figure \ref{fig:acf_petrol}) suggest that
 there might be a slight trend in petrol usage however it does not appear
 to be of much significance.
 
-Fuel trade data can be compared to the VKT data from NZTA. VKT data
-including quarterly data of 10 regions plus one ``other'' region was
-given by Haobo Wang from NZTA for use in this project. Further yearly
-data for VKT of the ``other'' regions, the vehicle fuel type and vehicle
-type was collected from the publicly available fleet statistics page on
-NZTA's website. The quarterly VKT data was then multiplied by the
-proportion of VKT that was attributed to light passenger vehicles in
-that year.
+Fuel trade data can be compared to the VKT data from the Ministry of
+Transport. VKT data including quarterly data of 10 regions plus one
+``other'' region was given by Haobo Wang from the Ministry of Transport
+for use in this project. Further yearly data for VKT of the ``other''
+regions, the vehicle fuel type and vehicle type was collected from the
+publicly available fleet statistics page on Ministry of Transport's
+website. The quarterly VKT data was then multiplied by the proportion of
+VKT that was attributed to light passenger vehicles in that year.
 
 \begin{figure}
 \centering
@@ -301,16 +301,17 @@ in 2019.
 \caption{NZ Seasonal Component Decompostions}
 \end{figure}
 
-Looking at the Seasonal trend of Petrol Usage and VKT data from NZTA, we
-can see an obvious decrease in the winter months with a peak in the 4th
-quarter likely corresponding to holiday travel. Petrol Usage shows this
-variation to be much larger in the VKT data from NZTA. It is unclear
-whether this would be due to the smoothing effect as was previously
-discussed regarding the NZTA data, or perhaps a change in efficiency for
-petrol vehicle by seasons similar to that of the EV. Combining these 2
-data sets it is reasonable to suggest that in New Zealand, compared to
-the winter (Q2 and Q3) VKT, the true VKT in the summer (Q1 and Q4) is
-between 1.3\% higher, as suggested by the VKT data from NZTA, to 5\%
+Looking at the Seasonal trend of Petrol Usage and VKT data from Ministry
+of Transport, we can see an obvious decrease in the winter months with a
+peak in the 4th quarter likely corresponding to holiday travel. Petrol
+Usage shows this variation to be much larger in the VKT data from
+Ministry of Transport. It is unclear whether this would be due to the
+smoothing effect as was previously discussed regarding the Ministry of
+Transport data, or perhaps a change in efficiency for petrol vehicle by
+seasons similar to that of the EV. Combining these 2 data sets it is
+reasonable to suggest that in New Zealand, compared to the winter (Q2
+and Q3) VKT, the true VKT in the summer (Q1 and Q4) is between 1.3\%
+higher, as suggested by the VKT data from Ministry of Transport, to 5\%
 higher, according to the petrol usage data.
 
 Looking at the seasonal trend of EV energy economy we can see a much
@@ -554,13 +555,13 @@ electricity demand. To do this we make the following assumptions:
 month\label{fig:Auckland_power}}
 \end{figure}
 
-Combining Auckland only NZTA 2019 VKT with the energy economy linear
-model using Flip the Fleet's vehicle make up and average weather data
-from 2017-2021 we can estimate the electricity demand for 100\% EV
-uptake. This is shown in Figure \ref{fig:Auckland_power}. The estimated
-EV electricity demand per month shows a clear seasonal trend from around
-127.7 GWh per month in summer to around 137.1 GWh per month in the
-winter.
+Combining Auckland only Ministry of Transport 2019 VKT with the energy
+economy linear model using Flip the Fleet's vehicle make up and average
+weather data from 2017-2021 we can estimate the electricity demand for
+100\% EV uptake. This is shown in Figure \ref{fig:Auckland_power}. The
+estimated EV electricity demand per month shows a clear seasonal trend
+from around 127.7 GWh per month in summer to around 137.1 GWh per month
+in the winter.
 
 \begin{figure}
 \centering
@@ -569,12 +570,12 @@ winter.
 month\label{fig:NZ_power}}
 \end{figure}
 
-Similarly combining NZTA 2019 regional VKT with the energy economy
-linear model using Flip the Fleets vehicle make up and average regional
-weather data from 2017-2021 we can determine the electricity demand with
-100\% EV uptake. This is shown in Figure \ref{fig:NZ_power} where a
-clear seasonal trend is observed from around 416 GWh per month in summer
-to around 453 GWh per month in the winter.
+Similarly combining Ministry of Transport 2019 regional VKT with the
+energy economy linear model using Flip the Fleets vehicle make up and
+average regional weather data from 2017-2021 we can determine the
+electricity demand with 100\% EV uptake. This is shown in Figure
+\ref{fig:NZ_power} where a clear seasonal trend is observed from around
+416 GWh per month in summer to around 453 GWh per month in the winter.
 
 \begin{figure}
 \centering
@@ -594,17 +595,17 @@ therefore decreasing efficiency in the summer month.
 
 \begin{figure}
 \centering
-\includegraphics{final_report_files/figure-latex/vehicle_power_usage-1.pdf}
-\caption{2019 VKT 100\% EV case NZ total EV electricity demand scenarios
-by vehicle fleet model makeup\label{fig:vehicle_power_usage}}
+\includegraphics{final_report_files/figure-latex/vehicle_power_usage_auck-1.pdf}
+\caption{2019 VKT 100\% EV case Auckland total EV electricity demand
+Scenarios by vehicle fleet model
+makeup\label{fig:vehicle_power_usage_auck}}
 \end{figure}
 
 \begin{figure}
 \centering
-\includegraphics{final_report_files/figure-latex/vehicle_power_usage_auck-1.pdf}
-\caption{2019 VKT 100\% EV case auckland total EV electricity demand
-Scenarios by vehicle fleet model
-makeup\label{fig:vehicle_power_usage_auck}}
+\includegraphics{final_report_files/figure-latex/vehicle_power_usage-1.pdf}
+\caption{2019 VKT 100\% EV case NZ total EV electricity demand scenarios
+by vehicle fleet model makeup\label{fig:vehicle_power_usage}}
 \end{figure}
 
 Combining the regional energy economy used to plot figure
@@ -664,23 +665,23 @@ months of efficiency data from 5 vehicles).
 \begin{figure}
 \centering
 \includegraphics{final_report_files/figure-latex/kea_power_usage-1.pdf}
-\caption{NZ EVs electricity demand per month using EECAs kea VKT and
+\caption{NZ EVs electricity demand per month using EECAs Kea VKT and
 Flip the Fleets average energy economy\label{fig:kea_power_usage}}
 \end{figure}
 
 \begin{figure}
 \centering
 \includegraphics{final_report_files/figure-latex/tui_power_usage-1.pdf}
-\caption{NZ EVs electricity demand per month using EECAs tui VKT and
+\caption{NZ EVs electricity demand per month using EECAs Tui VKT and
 Flip the Fleets average energy economy\label{fig:tui_power_usage}}
 \end{figure}
 
 Figure \ref{fig:kea_power_usage} and Figure \ref{fig:tui_power_usage}
 use our energy economy model with Flip the Fleets vehicle make up, NZ
-region weather from 2017 to 2021 and NZTA VKT regional proportions
-combined with ECCA times models expected passenger EV VKT to estimate
-total monthly power usage of NZ by passenger EVs for select years
-between 2018 and 2060.
+region weather from 2017 to 2021 and Ministry of Transport VKT regional
+proportions combined with ECCA times models expected passenger EV VKT to
+estimate total monthly power usage of NZ by passenger EVs for select
+years between 2018 and 2060.
 
 \begin{thebibliography}{9}
 \bibitem{ftf}
@@ -699,7 +700,7 @@ between 2018 and 2060.
 \textit{Bayesian estimation of a building's base temperature for the calculation of heating degree-days}
 \\\texttt{\url{https://www.sciencedirect.com/science/article/abs/pii/S0378778816312907}}
 \bibitem{NZTA_VKT}
-\textit{NZTA VKT data website}
+\textit{Ministry of Transport VKT data website}
 \\\texttt{\url{https://www.transport.govt.nz/statistics-and-insights/fleet-statistics/vehicle-kms-travelled-vkt-2/}}
 \bibitem{times_model}
 \textit{ECCA Times Model}

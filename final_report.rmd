@@ -74,11 +74,12 @@ E_{m,R} = \eta_{m,R} \times d_{m,R}
 
 Distance traveled and vehicle energy efficiency (km/kWh) by month, as well as the region of the vehicle was collected from the on-board computers of `r length(unique(EV_data$vehicle))` electric vehicles (EV) between `r min(EV_data$year)` and `r max(EV_data$year)` by Flip the Fleet \cite{ftf}. 
 
-A monthly weighted average energy efficiency was calculated for the whole of New Zealand and then for each region. The monthly averages were weighted using the distance traveled to give more weighting to vehicles with higher km traveled in that month. This was done using the formula
+Energy economy (Wh/km) was calculated as the inverse of efficiency (km/kWh). Energy economy will be used instead of efficiency in the modelling in this work for reasons that will become apparent later in the analysis. 
+
+A monthly weighted average energy economy was calculated for the whole of New Zealand and then for each region. The monthly averages were weighted using the distance traveled to give more weighting to vehicles with higher km traveled in that month. This was done using the formula
 
 $$\bar{x} = \frac{\sum_{i}^{n} (d_i\times x_i)}{\left(\sum_{i}^{n} d_i\right)\times n}$$
 
-Energy economy (Wh/km) was calculated as the inverse of efficiency (km/kWh). Energy economy will be used instead of efficiency in the modelling in this work for reasons that will become apparent later in the analysis. 
 
 
 ```{r consum_plot, fig.cap="National monthly average energy economy of Flip the Fleet vehicles\\label{fig:consum_plot}"}
@@ -203,7 +204,7 @@ acf(decomp_petrol$x, main = "")
 The autocorrelation plot (figure \ref{fig:acf_petrol}) suggest that there might be a slight trend in petrol usage however it does not appear to be of much significance. 
 
 
-Fuel trade data can be compared to the VKT data from NZTA. VKT data including quarterly data of 10 regions plus one "other" region was given by Haobo Wang from NZTA for use in this project. Further yearly data for VKT of the "other" regions, the vehicle fuel type and vehicle type was collected from the publicly available fleet statistics page on NZTA's website. The quarterly VKT data was then multiplied by the proportion of VKT that was attributed to light passenger vehicles in that year.
+Fuel trade data can be compared to the VKT data from the Ministry of Transport. VKT data including quarterly data of 10 regions plus one "other" region was given by Haobo Wang from the Ministry of Transport for use in this project. Further yearly data for VKT of the "other" regions, the vehicle fuel type and vehicle type was collected from the publicly available fleet statistics page on Ministry of Transport's website. The quarterly VKT data was then multiplied by the proportion of VKT that was attributed to light passenger vehicles in that year.
 
 ```{r VKT_ts, fig.cap="Decomposition of NZ all regions passenger VKT Time Series\\label{fig:VKT_ts}", warning=FALSE, message=FALSE, fig.height=6}
 decomp_vkt = vkt_quart_pass[vkt_quart_pass$year >= 2003,]$total %>% 
@@ -237,11 +238,11 @@ points(unique(fuel_trade$month)-1,decomp_petrol$figure, type = 'b', col = 2, xla
 
 points(c(2,5,8,11), decomp_vkt$figure, type = 'b', col = 3, xlab="", ylab="")
 
-legend("topright", inset = legend_inset, legend = c("EV Energy Economy", "Petrol Usage", "NZTA VKT"), lty = 1,pch = 1, col = 1:3)
+legend("topright", inset = legend_inset, legend = c("EV Energy Economy", "Petrol Usage", "Ministry of Transport VKT"), lty = 1,pch = 1, col = 1:3)
 ```
 
 
-Looking at the Seasonal trend of Petrol Usage and VKT data from NZTA, we can see an obvious decrease in the winter months with a peak in the 4th quarter likely corresponding to holiday travel. Petrol Usage shows this variation to be much larger in the VKT data from NZTA. It is unclear whether this would be due to the smoothing effect as was previously discussed regarding the NZTA data, or perhaps a change in efficiency for petrol vehicle by seasons similar to that of the EV. Combining these 2 data sets it is reasonable to suggest that in New Zealand, compared to the winter (Q2 and Q3) VKT, the true VKT in the summer (Q1 and Q4) is between `r round((mean(decomp_vkt$figure[c(4,1)])/mean(decomp_vkt$figure[2:3])-1)*100,1)`\% higher, as suggested by the VKT data from NZTA, to `r round((mean(decomp_petrol$figure[c(4,1)])/mean(decomp_petrol$figure[2:3])-1)*100,1)`\% higher, according to the petrol usage data.
+Looking at the Seasonal trend of Petrol Usage and VKT data from Ministry of Transport, we can see an obvious decrease in the winter months with a peak in the 4th quarter likely corresponding to holiday travel. Petrol Usage shows this variation to be much larger in the VKT data from Ministry of Transport. It is unclear whether this would be due to the smoothing effect as was previously discussed regarding the Ministry of Transport data, or perhaps a change in efficiency for petrol vehicle by seasons similar to that of the EV. Combining these 2 data sets it is reasonable to suggest that in New Zealand, compared to the winter (Q2 and Q3) VKT, the true VKT in the summer (Q1 and Q4) is between `r round((mean(decomp_vkt$figure[c(4,1)])/mean(decomp_vkt$figure[2:3])-1)*100,1)`\% higher, as suggested by the VKT data from Ministry of Transport, to `r round((mean(decomp_petrol$figure[c(4,1)])/mean(decomp_petrol$figure[2:3])-1)*100,1)`\% higher, according to the petrol usage data.
 
 Looking at the seasonal trend of EV energy economy we can see a much larger increase in energy economy in the winter months, with average energy economy in July being `r round(abs(max(decomp_consum$figure)/min(decomp_consum$figure)-1)*100, 1)`\% higher energy economy than in February. From the plot we can see that when energy economy of EVs increases, VKT goes down, suggesting that some increase in total power usage due to EVs increase in energy economy will be countered by a decrease in VKT. However, the increase in energy economy is much larger than the decrease in VKT. This, combined with the fact that winter is when our electricity grid in New Zealand is already under strain due to heating demand, suggests that if we ignore the relatively small change in VKT in our model we can effectively model a worst case scenario. Thus we propose that monthly distance ($d_{R}$) in our model is constant and determined by the yearly regional VKT data from 2019. 
 
@@ -351,7 +352,7 @@ axis(1, labels = month.abb, at = 1:12, las = 1)
 ```
 
 
-Combining Auckland only NZTA 2019 VKT with the energy economy linear model using Flip the Fleet's vehicle make up and average weather data from 2017-2021 we can estimate the electricity demand for 100% EV uptake. This is shown in Figure \ref{fig:Auckland_power}. The estimated EV electricity demand per month shows a clear seasonal trend from around `r round(min(power_usage$Auckland_fit),1)` GWh per month in summer to around `r round(max(power_usage$Auckland_fit),1)` GWh per month in the winter.
+Combining Auckland only Ministry of Transport 2019 VKT with the energy economy linear model using Flip the Fleet's vehicle make up and average weather data from 2017-2021 we can estimate the electricity demand for 100% EV uptake. This is shown in Figure \ref{fig:Auckland_power}. The estimated EV electricity demand per month shows a clear seasonal trend from around `r round(min(power_usage$Auckland_fit),1)` GWh per month in summer to around `r round(max(power_usage$Auckland_fit),1)` GWh per month in the winter.
 
 <!-- The upper and lower estimate are 95% confidence interval on the linear model. As confidence intervals are unknown for the future VKT and future weather the confidence intervals do not include this uncertainty. (should i just remove from the plot as do not have much meaning)  -->
 
@@ -363,7 +364,7 @@ axis(1, labels = month.abb, at = 1:12, las = 1)
 ```
 
 
-Similarly combining NZTA 2019 regional VKT with the energy economy linear model using Flip the Fleets vehicle make up and average regional weather data from 2017-2021 we can determine the electricity demand with 100% EV uptake. This is shown in Figure \ref{fig:NZ_power} where a clear seasonal trend is observed from around `r round(min(power_usage$total_fit),0)` GWh per month in summer to around `r round(max(power_usage$total_fit),0)` GWh per month in the winter.
+Similarly combining Ministry of Transport 2019 regional VKT with the energy economy linear model using Flip the Fleets vehicle make up and average regional weather data from 2017-2021 we can determine the electricity demand with 100% EV uptake. This is shown in Figure \ref{fig:NZ_power} where a clear seasonal trend is observed from around `r round(min(power_usage$total_fit),0)` GWh per month in summer to around `r round(max(power_usage$total_fit),0)` GWh per month in the winter.
 
 
 ```{r NZ_region_power_prop, fig.cap="All NZ regions monthly proportional change in EV electricity demand relative to its yearly average\\label{fig:NZ_region_power_prop}"}
@@ -386,10 +387,29 @@ power_usage_prop %>%
 Applying the same process to all regions we can also plot each regions proportional change in EV electricity demand relative to its yearly average. Figure \ref{fig:NZ_region_power_prop} shows all regions follow a similar seasonal change in power energy economy. Of note, regions like Northland and Auckland appear to have less of a seasonal trend compared to regions such as Otago and the West Coast likely due to a warmer climate leading to increased AC usage during the summer months and therefore decreasing efficiency in the summer month. 
 
 
+```{r vehicle_power_usage_auck, fig.cap="2019 VKT 100% EV case Auckland total EV electricity demand Scenarios by vehicle fleet model makeup\\label{fig:vehicle_power_usage_auck}"}
+limit_power_usage %>% 
+  select("Auckland_Hyundai Ioniq (EV)","Auckland_Nissan Leaf (62 kWh)","Auckland_Tesla Model S") %>% 
+  cbind("Flip the Fleet average" = power_usage$Auckland_fit) %>% 
+  rename("Hyundai Ioniq" = "Auckland_Hyundai Ioniq (EV)", "Nissan Leaf (62 kWh)" = "Auckland_Nissan Leaf (62 kWh)", "Tesla Model S" = "Auckland_Tesla Model S") %>% 
+  tibble::rownames_to_column("month") %>% 
+  mutate(across(month, as.numeric)) %>% 
+  gather(key = "Vehicle", value = value, -month) %>% 
+  ggplot(aes(x = month, y = value, color = Vehicle)) +
+    scale_x_discrete(limits = month.abb) +
+    gg_color_palette +
+    ylab("Monthly EV Electricity Demand (GWh)") +
+    xlab("") +
+    geom_line() +
+    gg_theme
+```
+
+
+
 ```{r vehicle_power_usage, fig.cap="2019 VKT 100% EV case NZ total EV electricity demand scenarios by vehicle fleet model makeup\\label{fig:vehicle_power_usage}"}
 limit_power_usage %>% 
   select(total_best,total_worst,tesla_s) %>% 
-  cbind("Flip the fleet average" = power_usage$total_fit) %>% 
+  cbind("Flip the Fleet average" = power_usage$total_fit) %>% 
   rename("Hyundai Ioniq" = total_best, "Nissan Leaf (62 kWh)" = total_worst, "Tesla Model S" = tesla_s) %>% 
   tibble::rownames_to_column("month") %>% 
   mutate(across(month, as.numeric)) %>% 
@@ -403,22 +423,7 @@ limit_power_usage %>%
     gg_theme
 ```
 
-```{r vehicle_power_usage_auck, fig.cap="2019 VKT 100% EV case auckland total EV electricity demand Scenarios by vehicle fleet model makeup\\label{fig:vehicle_power_usage_auck}"}
-limit_power_usage %>% 
-  select("Auckland_Hyundai Ioniq (EV)","Auckland_Nissan Leaf (62 kWh)","Auckland_Tesla Model S") %>% 
-  cbind("Flip the fleet average" = power_usage$Auckland_fit) %>% 
-  rename("Hyundai Ioniq" = "Auckland_Hyundai Ioniq (EV)", "Nissan Leaf (62 kWh)" = "Auckland_Nissan Leaf (62 kWh)", "Tesla Model S" = "Auckland_Tesla Model S") %>% 
-  tibble::rownames_to_column("month") %>% 
-  mutate(across(month, as.numeric)) %>% 
-  gather(key = "Vehicle", value = value, -month) %>% 
-  ggplot(aes(x = month, y = value, color = Vehicle)) +
-    scale_x_discrete(limits = month.abb) +
-    gg_color_palette +
-    ylab("Monthly EV Electricity Demand (GWh)") +
-    xlab("") +
-    geom_line() +
-    gg_theme
-```
+
 
 
 Combining the regional energy economy used to plot figure \ref{fig:vehicle_consum} with the 2019 VKT number we can get an expected EV electricity demand for all of NZ and also for each VKT region. Figure \ref{fig:vehicle_power_usage} shows with a 100% EV penetration and an EV fleet comparable to the Flip the Fleet, the monthly EV electricity demand for all of NZ goes from `r round(min(power_usage$total_fit),0)` GWh minimum in the summer to `r round(max(power_usage$total_fit),0)` GWh maximum EV electricity demand in the winter. If the fleet consisted of heavier less efficient vehicles like the Tesla Model S this would increase to `r round(min(limit_power_usage$tesla_s),0)` GWh minimum in the summer to `r round(max(limit_power_usage$tesla_s),0)` GWh maximum EV electricity demand in the winter. Figure \ref{fig:vehicle_power_usage_auck} shows with a 100% EV penetration and an EV fleet comparable to the Flip the Fleet, the monthly EV electricity demand of Auckland goes from `r round(min(power_usage$Auckland_fit),0)` GWh minimum in the summer to `r round(max(power_usage$Auckland_fit),0)` GWh maximum EV electricity demand in the winter. If the fleet consisted of heavier less efficient vehicles like the Tesla Model S this would increase to `r round(min(limit_power_usage$"Auckland_Tesla Model S"),0)` GWh minimum in the summer to `r round(max(limit_power_usage$"Auckland_Tesla Model S"),0)` GWh maximum EV electricity demand in the winter.
@@ -451,13 +456,15 @@ legend("bottomright", inset = legend_inset, legend = c("Hyundai Ioniq", "Flip th
 Figure \ref{fig:vehicle_consum} shows comparing flip the fleet energy economy numbers to EECA's times tui model \cite{times_model} energy economy we can see that ECCA's times model is based on a much higher energy economy (lower efficiency) than the flip the fleet data would suggest. With the energy economy model using the flip the fleet vehicle make up suggests an average of `r round(mean(power_usage$total_fit_consumption),1)`Wh/km. However, this is consisting of primarily of Nissan leafs with `r sum(model_pop$count[c(1,2,3,4,11)])` out of `r sum(model_pop$count)` vehicles included in the flip the fleet data being Nissan leafs which is a quite light and efficient EV. The 2018 times model energy economy is much more comparable to much heavier and less efficient Tesla Model S (based on `r sum(EV_data$model == "Tesla Model S")` months of efficiency data from `r model_pop$count[model_pop$model == "Tesla Model S"]` vehicles). 
 
 
-```{r kea_power_usage, fig.cap="NZ EVs electricity demand per month using EECAs kea VKT and Flip the Fleets average energy economy\\label{fig:kea_power_usage}"}
+```{r kea_power_usage, fig.cap="NZ EVs electricity demand per month using EECAs Kea VKT and Flip the Fleets average energy economy\\label{fig:kea_power_usage}"}
 kea_power_usage[kea_power_usage$Region == "total" & kea_power_usage$year %in% c(2018,2030,2040,2050,2060),] %>% 
   mutate(across(year, as.factor)) %>%
   ggplot(aes(x = month, y = value, color = year)) +
     scale_x_discrete(limits = month.abb) +
+    scale_y_continuous(limits = c(0,max(tui_power_usage$value))) +
     gg_color_palette + 
-    ylab("Total NZ EV Electricity Demand per Month (GWh)")+
+    labs(color = "") +
+    ylab("Total NZ EV Electricity Demand per Month (GWh)") +
     xlab("") +
     geom_line() +
     gg_theme
@@ -465,19 +472,20 @@ kea_power_usage[kea_power_usage$Region == "total" & kea_power_usage$year %in% c(
 
 
 
-```{r tui_power_usage, fig.cap="NZ EVs electricity demand per month using EECAs tui VKT and Flip the Fleets average energy economy\\label{fig:tui_power_usage}"}
+```{r tui_power_usage, fig.cap="NZ EVs electricity demand per month using EECAs Tui VKT and Flip the Fleets average energy economy\\label{fig:tui_power_usage}"}
 tui_power_usage[tui_power_usage$Region == "total" & tui_power_usage$year %in% c(2018,2030,2040,2050,2060),] %>% 
   mutate(across(year, as.factor)) %>%
   ggplot(aes(x = month, y = value, color = year)) +
     scale_x_discrete(limits = month.abb) +
-    gg_color_palette + 
+    gg_color_palette +
+    labs(color = "") +
     ylab("Total NZ EV Electricity Demand per Month (GWh)")+
     xlab("") +
     geom_line() +
     gg_theme
 ```
 
-Figure \ref{fig:kea_power_usage} and Figure \ref{fig:tui_power_usage} use our energy economy model with Flip the Fleets vehicle make up, NZ region weather from 2017 to 2021 and NZTA VKT regional proportions combined with ECCA times models expected passenger EV VKT to estimate total monthly power usage of NZ by passenger EVs for select years between 2018 and 2060. 
+Figure \ref{fig:kea_power_usage} and Figure \ref{fig:tui_power_usage} use our energy economy model with Flip the Fleets vehicle make up, NZ region weather from 2017 to 2021 and Ministry of Transport VKT regional proportions combined with ECCA times models expected passenger EV VKT to estimate total monthly power usage of NZ by passenger EVs for select years between 2018 and 2060. 
 
 
 
@@ -499,7 +507,7 @@ Figure \ref{fig:kea_power_usage} and Figure \ref{fig:tui_power_usage} use our en
 \textit{Bayesian estimation of a building's base temperature for the calculation of heating degree-days}
 \\\texttt{\url{https://www.sciencedirect.com/science/article/abs/pii/S0378778816312907}}
 \bibitem{NZTA_VKT}
-\textit{NZTA VKT data website}
+\textit{Ministry of Transport VKT data website}
 \\\texttt{\url{https://www.transport.govt.nz/statistics-and-insights/fleet-statistics/vehicle-kms-travelled-vkt-2/}}
 \bibitem{times_model}
 \textit{ECCA Times Model}
