@@ -65,14 +65,10 @@ load("processed_data/power_usage.rda")
 This document provides an overview of a project that Vector has sponsored in collaboration with the University of Otago over the 2021/2022 summer. The project was carried out by student Pablo Paulsen, who was supervised by Vector's Rafferty Parker and The University of Otago's Associate Professor Michael Jack. 
 
 The key research question examined in this project was how much the volume of electricity consumed by EVs in New Zealand changes with the season.
-It is already known from international research that the efficiency of EVs will have some degree of seasonal variation. This is in part due to effects of temperature on the batteries, and in part due to the use of heating and air conditioning. In addition, the average distances people drive each day also change with the seasons. As an example, some households may drive more in summer as they have more recreational activities to get to, whereas some households may drive more in winter as the weather makes it more unpleasant to cycle.
+It is already known from international research that the efficiency of EVs will have some degree of seasonal variation. This is in part due to effects of temperature on the batteries, and in part due to the use of heating and air conditioning. In addition, the average distances people drive each day also change with the seasons. As an example, some households may drive more in summer as they have more recreational activities to get to, whereas some households may drive more in winter as the weather makes it more unpleasant to walk or cycle.
 
-This project hopes to quantify these fluctuations in electricity demand for New Zealand drivers and New Zealand weather conditions, so that we may incorporate them into our network planning. 
-Existing research on the effects EVs will have on New Zealand’s electricity network all assume charging demand remains constant throughout the year. This is not a valid assumption, and could have significant impacts on how we plan for EVs, especially as our network peaks are already very seasonal.
-
-This analysis builds upon existing insights gained by Vector's EV trial, which was carried out between the end of 2019 to the end of 2021. Because our EV trial coincided with COVID lockdowns, many of the seasonal impacts on charging behaviour have been muddied.
-In addition, the data from our EV trial was collected from the EV chargers, so we had no information on things like the distance EVs were travelling for example that may have allowed us to account for COVID-related impacts. This analysis thus facilitates greater understanding into key topics that the Vector EV trial was unable to provide. 
-
+This project quantifies these fluctuations in electricity demand for New Zealand drivers and New Zealand weather conditions, so that we may incorporate them into future network planning. 
+Existing research on the effects EVs will have on New Zealand’s electricity network all assume charging demand remains constant throughout the year. This is not a valid assumption, and could have significant impacts on how we plan for EVs, especially as existing network peaks are already very seasonal.
 
 ## Data exploration 
 
